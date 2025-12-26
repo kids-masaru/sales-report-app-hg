@@ -22,13 +22,29 @@ st.set_page_config(
 # PWA & Icon Setup
 try:
     from icon_data import ICON_BASE64
-    def setup_pwa(icon_base64):
-        icon_data = f"data:image/png;base64,{icon_base64}"
+    import os
+    
+    # Ensure static directory exists and save icon
+    if not os.path.exists("static"):
+        os.makedirs("static")
+    
+    icon_path = "static/icon.png"
+    # Always overwrite to ensure latest icon
+    with open(icon_path, "wb") as f:
+        f.write(base64.b64decode(ICON_BASE64))
+            
+    def setup_pwa():
+        # Streamlit serves static files at app/static/filename when enableStaticServing is true
+        # Using relative path "app/static/icon.png" or just "static/icon.png"
+        # HF Spaces usually mounts app at root, but Streamlit static serving adds 'app' prefix in some versions or just maps root.
+        # Let's try "app/static/icon.png" which is standard for Streamlit >= 1.18
+        icon_url = "app/static/icon.png" 
+        
         st.markdown(
             f"""
-            <link rel="apple-touch-icon" href="{icon_data}">
-            <link rel="apple-touch-icon-precomposed" href="{icon_data}">
-            <link rel="shortcut icon" href="{icon_data}">
+            <link rel="apple-touch-icon" href="{icon_url}">
+            <link rel="apple-touch-icon-precomposed" href="{icon_url}">
+            <link rel="shortcut icon" href="{icon_url}">
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             <meta name="apple-mobile-web-app-title" content="活動記録">
@@ -51,7 +67,7 @@ try:
             """,
             unsafe_allow_html=True
         )
-    setup_pwa(ICON_BASE64)
+    setup_pwa()
 except Exception as e:
     pass
 
