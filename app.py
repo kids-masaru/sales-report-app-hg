@@ -35,13 +35,13 @@ try:
             
     def setup_pwa():
         # Streamlit serves static files at app/static/filename when enableStaticServing is true
-        # Using relative path "app/static/icon.png" or just "static/icon.png"
-        # HF Spaces usually mounts app at root, but Streamlit static serving adds 'app' prefix in some versions or just maps root.
-        # Let's try "app/static/icon.png" which is standard for Streamlit >= 1.18
-        icon_url = "app/static/icon.png" 
+        # Use root-relative path for better compatibility with iOS and Manifest
+        icon_url = "/app/static/icon.png" 
+        manifest_url = "/app/static/manifest.json"
         
         st.markdown(
             f"""
+            <link rel="manifest" href="{manifest_url}">
             <link rel="apple-touch-icon" href="{icon_url}">
             <link rel="apple-touch-icon-precomposed" href="{icon_url}">
             <link rel="shortcut icon" href="{icon_url}">
