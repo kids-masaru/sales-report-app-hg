@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <filter id="shadow">
+        <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <g transform="translate(5, 5)">
+    <!-- Document Icon (Blue for Activity Report) - Scaled up -->
+    <rect x="10" y="10" width="100" height="130" rx="10" fill="#4facfe" filter="url(#shadow)" />
+    <rect x="30" y="40" width="60" height="10" fill="white" opacity="0.9" />
+    <rect x="30" y="60" width="60" height="10" fill="white" opacity="0.9" />
+    <rect x="30" y="80" width="40" height="10" fill="white" opacity="0.9" />
+    
+    <!-- Chat Bubble Icon (Orange/Warm for Q&A) - Scaled up & Positioned prominently -->
+    <path d="M70,80 L130,80 A10,10 0 0,1 140,90 L140,120 A10,10 0 0,1 130,130 L100,130 L80,145 L80,130 L70,130 A10,10 0 0,1 60,120 L60,90 A10,10 0 0,1 70,80 Z" fill="#FF9F1C" stroke="white" stroke-width="3" filter="url(#shadow)"/>
+    <text x="85" y="115" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="white">?</text>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <filter id="shadow">
+        <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <g transform="translate(10, 10)">
+     <!-- Chat Bubble Icon (Orange - Main) -->
+    <path d="M10,10 L130,10 A10,10 0 0,1 140,20 L140,90 A10,10 0 0,1 130,100 L100,100 L80,120 L80,100 L20,100 A10,10 0 0,1 10,90 L10,20 A10,10 0 0,1 10,10 Z" fill="#FF9F1C" stroke="white" stroke-width="3" filter="url(#shadow)"/>
+    <text x="55" y="75" font-family="Arial, sans-serif" font-weight="bold" font-size="60" fill="white">?</text>
+  </g>
+</svg>
