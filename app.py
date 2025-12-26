@@ -26,11 +26,12 @@ try:
         icon_data = f"data:image/png;base64,{icon_base64}"
         st.markdown(
             f"""
-            <head>
             <link rel="apple-touch-icon" href="{icon_data}">
+            <link rel="apple-touch-icon-precomposed" href="{icon_data}">
+            <link rel="shortcut icon" href="{icon_data}">
             <meta name="apple-mobile-web-app-capable" content="yes">
-            <meta name="apple-mobile-web-app-status-bar-style" content="black">
-            </head>
+            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+            <meta name="apple-mobile-web-app-title" content="活動記録">
             <style>
             /* Hide Streamlit elements */
             #MainMenu {{visibility: hidden;}}
