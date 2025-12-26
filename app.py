@@ -1,10 +1,21 @@
-
 import streamlit as st
+import base64
+import io
+from PIL import Image
 
-# Page Configuration
+# Page Configuration Setup using Custom Icon
+try:
+    from icon_data import ICON_BASE64
+    # Convert Base64 back to PIL Image for st.set_page_config
+    icon_bytes = base64.b64decode(ICON_BASE64)
+    icon_image = Image.open(io.BytesIO(icon_bytes))
+    page_icon_config = icon_image
+except:
+    page_icon_config = "📝"
+
 st.set_page_config(
     page_title="活動記録作成",
-    page_icon="📝",
+    page_icon=page_icon_config,
     layout="centered"
 )
 
@@ -25,8 +36,16 @@ try:
             #MainMenu {{visibility: hidden;}}
             header {{visibility: hidden;}}
             footer {{visibility: hidden;}}
-            /* Header adjustments */
+            /* Header adjustments: Hide default title from st.Page if possible, otherwise just hide stAppHeader */
             .stAppHeader {{display: none;}}
+            
+            /* Custom styling for SVG headers */
+            .custom-svg-header {{
+                display: flex;
+                align_items: center;
+                gap: 10px;
+                padding-bottom: 20px;
+            }}
             </style>
             """,
             unsafe_allow_html=True
@@ -35,7 +54,7 @@ try:
 except Exception as e:
     pass
 
-st.header("活動記録の作成")# Common CSS (Global)
+# User requested removal of redundant titles (st.header was here)# Common CSS (Global)
 st.markdown("""
 <style>
     /* CSS for compact UI and consistent headers */

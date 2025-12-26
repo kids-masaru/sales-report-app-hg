@@ -4,7 +4,16 @@ import utils
 import google.generativeai as genai
 
 def show():
-    st.header("質疑応答抽出")
+    # SVG Header
+    st.markdown("""
+        <div class="custom-svg-header">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 11.5C21.0039 12.8199 20.6957 14.1272 20.1009 15.2967C19.5061 16.4662 18.644 17.4611 17.595 18.1881C16.546 18.915 15.3444 19.3503 14.1027 19.4533C12.861 19.5563 11.6198 19.3235 10.493 18.777L4 21L6.223 14.5C5.67652 13.3732 5.44371 12.132 5.54673 10.8903C5.64975 9.64861 6.08502 8.44702 6.81195 7.39799C7.53888 6.34895 8.53381 5.48685 9.70327 4.89209C10.8727 4.29734 12.1801 3.98906 13.5 3.99304V4.00004H14V4.04304C15.8453 4.11656 17.6009 4.88604 18.8926 6.1873C20.1843 7.48855 20.9168 9.22591 20.934 11.071L21 11.5Z" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h2 style="margin: 0; padding: 0; color: #1F2937; font-family: sans-serif;">質疑応答抽出</h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.caption("音声データから質疑応答部分のみを抽出し、要約します。")
     st.divider()
 
