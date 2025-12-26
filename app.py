@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 
 # Page Configuration
@@ -9,7 +8,34 @@ st.set_page_config(
     layout="centered"
 )
 
-# Common CSS (Global)
+# PWA & Icon Setup
+try:
+    from icon_data import ICON_BASE64
+    def setup_pwa(icon_base64):
+        icon_data = f"data:image/png;base64,{icon_base64}"
+        st.markdown(
+            f"""
+            <head>
+            <link rel="apple-touch-icon" href="{icon_data}">
+            <meta name="apple-mobile-web-app-capable" content="yes">
+            <meta name="apple-mobile-web-app-status-bar-style" content="black">
+            </head>
+            <style>
+            /* Hide Streamlit elements */
+            #MainMenu {{visibility: hidden;}}
+            header {{visibility: hidden;}}
+            footer {{visibility: hidden;}}
+            /* Header adjustments */
+            .stAppHeader {{display: none;}}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    setup_pwa(ICON_BASE64)
+except Exception as e:
+    pass
+
+st.header("活動記録の作成")# Common CSS (Global)
 st.markdown("""
 <style>
     /* CSS for compact UI and consistent headers */
