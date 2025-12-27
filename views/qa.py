@@ -40,7 +40,7 @@ def show():
                         system_instruction=get_qa_prompt()
                     )
                     
-                    myfile = genai.upload_file(file_path)
+                    myfile = genai.upload_file(file_path, mime_type=utils.get_mime_type(file_path))
                     prompt = "この音声ファイルから質疑応答を抽出してください。"
                     response = model.generate_content([myfile, prompt])
                     
