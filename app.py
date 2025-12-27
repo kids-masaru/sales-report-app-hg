@@ -41,15 +41,13 @@ try:
             
     def setup_pwa():
         # Streamlit serves static files at app/static/filename when enableStaticServing is true
-        # Android works with root-relative path, but iOS seems to struggle.
-        # Switching to ABSOLUTE URL for iOS to ensure it finds the image.
-        # Direct URL format: https://{username}-{spacename}.hf.space
-        BASE_URL = "https://helpyu-sales-report-v2.hf.space"
+        # On Render, the domain is the app domain itself.
+        # Use simple root-relative path.
         
-        icon_url = "/app/static/icon.png" 
-        # Use Absolute URL for iOS
-        ios_icon_url = f"{BASE_URL}/app/static/apple-touch-icon.png"
-        manifest_url = "/app/static/manifest.json"
+        # Add versioning to force cache refresh
+        icon_url = "/app/static/icon.png?v=5" 
+        ios_icon_url = "/app/static/apple-touch-icon.png?v=5" 
+        manifest_url = "/app/static/manifest.json?v=5"
         
         st.markdown(
             f"""
@@ -123,6 +121,53 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# Simple Authentication Logic for Public Deployment (Render)
+# ---------------------------------------------------------
+import os
+
+# 1. Get password from env (Set this in Render Environment Variables)
+APP_PASSWORD = os.environ.get("APP_PASSWORD")
+
+# 2. Check auth
+def check_password():
+    """Returns `True` if the user had the correct password."""
+
+    # Bypass if no password is set (e.g. local dev without env)
+    if not APP_PASSWORD:
+        return True
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["password"] == APP_PASSWORD:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store password
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # First run, show input
+        st.text_input(
+            "パスワードを入力してください", type="password", on_change=password_entered, key="password"
+        )
+        return False
+    
+    elif not st.session_state["password_correct"]:
+        # Password incorrect, show input again
+        st.text_input(
+            "パスワードを入力してください", type="password", on_change=password_entered, key="password"
+        )
+        st.error("😕 パスワードが違います")
+        return False
+    
+    else:
+        # Password correct
+        return True
+
+if not check_password():
+    st.stop()
+# ---------------------------------------------------------
 
 # Logo (Sidebar top)
 # st.logo removed
