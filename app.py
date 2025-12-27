@@ -40,7 +40,6 @@ try:
         f.write(base64.b64decode(IOS_ICON_BASE64))
             
     def setup_pwa():
-    def setup_pwa():
         # Streamlit serves static files at app/static/filename when enableStaticServing is true
         # Try multiple path patterns to ensure iOS finds it on Render
         paths_to_try = [
