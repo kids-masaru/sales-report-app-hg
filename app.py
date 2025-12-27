@@ -40,27 +40,26 @@ try:
         f.write(base64.b64decode(IOS_ICON_BASE64))
             
     def setup_pwa():
-        # Streamlit serves static files at app/static/filename when enableStaticServing is true
-        # Try multiple path patterns to ensure iOS finds it on Render
-        paths_to_try = [
-            "/app/static/apple-touch-icon.png?v=6",
-            "/static/apple-touch-icon.png?v=6",
-            "static/apple-touch-icon.png?v=6"
-        ]
+        # GitHub Raw URL Strategy
+        # Since the repo is public, we can link directly to the image files on GitHub.
+        # This bypasses any server-side path issues on Render.
         
-        icon_url = "/app/static/icon.png?v=6"
-        manifest_url = "/app/static/manifest.json?v=6"
+        REPO_ROOT = "https://raw.githubusercontent.com/kids-masaru/sales-report-app-hg/main"
         
-        # Build link tags for all paths
-        apple_touch_icons = "\n".join([
-            f'<link rel="apple-touch-icon" sizes="180x180" href="{p}">' for p in paths_to_try
-        ])
+        # Add versioning to force cache refresh
+        icon_url = f"{REPO_ROOT}/static/icon.png?v=7"
+        
+        # Ideally we use the raw url for apple-touch-icon too
+        ios_icon_url = f"{REPO_ROOT}/static/apple-touch-icon.png?v=7"
+        
+        manifest_url = "/app/static/manifest.json?v=7"
         
         st.markdown(
             f"""
             <link rel="manifest" href="{manifest_url}">
             <link rel="icon" type="image/png" href="{icon_url}">
-            {apple_touch_icons}
+            <link rel="apple-touch-icon" sizes="180x180" href="{ios_icon_url}">
+            <link rel="apple-touch-icon-precomposed" href="{ios_icon_url}">
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             <meta name="apple-mobile-web-app-title" content="活動記録">
