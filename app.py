@@ -21,7 +21,7 @@ st.set_page_config(
 
 # PWA & Icon Setup
 try:
-    from icon_data import ICON_BASE64
+    from icon_data import ICON_BASE64, IOS_ICON_BASE64
     import os
     
     # Ensure static directory exists and save icon
@@ -29,22 +29,29 @@ try:
         os.makedirs("static")
     
     icon_path = "static/icon.png"
+    ios_icon_path = "static/apple-touch-icon.png"
+    
     # Always overwrite to ensure latest icon
     with open(icon_path, "wb") as f:
         f.write(base64.b64decode(ICON_BASE64))
+        
+    # Save iOS icon
+    with open(ios_icon_path, "wb") as f:
+        f.write(base64.b64decode(IOS_ICON_BASE64))
             
     def setup_pwa():
         # Streamlit serves static files at app/static/filename when enableStaticServing is true
         # Use root-relative path for better compatibility with iOS and Manifest
         icon_url = "/app/static/icon.png" 
+        ios_icon_url = "/app/static/apple-touch-icon.png"
         manifest_url = "/app/static/manifest.json"
         
         st.markdown(
             f"""
             <link rel="manifest" href="{manifest_url}">
-            <link rel="apple-touch-icon" href="{icon_url}">
-            <link rel="apple-touch-icon-precomposed" href="{icon_url}">
-            <link rel="shortcut icon" href="{icon_url}">
+            <link rel="icon" type="image/png" href="{icon_url}">
+            <link rel="apple-touch-icon" sizes="180x180" href="{ios_icon_url}">
+            <link rel="apple-touch-icon-precomposed" href="{ios_icon_url}">
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             <meta name="apple-mobile-web-app-title" content="活動記録">
