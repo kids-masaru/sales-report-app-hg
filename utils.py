@@ -204,9 +204,20 @@ def parse_json_response(response_text: str) -> dict:
         return json.loads(json_str)
     except: return None
 
+def get_mime_type(file_path: str) -> str:
+    ext = Path(file_path).suffix.lower()
+    if ext == ".mp3": return "audio/mp3"
+    elif ext == ".wav": return "audio/wav"
+    elif ext == ".m4a": return "audio/mp4" # Gemini usually treats m4a as mp4 audio or just audio/m4a if supported, generally audio/mp4 is safe standard or audio/mpeg
+    elif ext == ".webm": return "audio/webm"
+    elif ext == ".aac": return "audio/aac"
+    elif ext == ".flac": return "audio/flac"
+    elif ext == ".ogg": return "audio/ogg"
+    else: return "audio/mp3" # Fallback
+
 def process_audio_only(audio_file_path: str) -> dict:
     model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=get_extraction_prompt(get_current_date_str()))
-    uploaded_file = genai.upload_file(audio_file_path)
+    uploaded_file = genai.upload_file(audio_file_path, mime_type=get_mime_type(audio_file_path))
     prompt = "この音声ファイルの内容を聞き取り、営業報告データを抽出してください。"
     response = model.generate_content([uploaded_file, prompt])
     return parse_json_response(response.text)
@@ -219,7 +230,7 @@ def process_text_only(text: str) -> dict:
 
 def process_audio_and_text(audio_file_path: str, text: str) -> dict:
     model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=get_extraction_prompt(get_current_date_str()))
-    uploaded_file = genai.upload_file(audio_file_path)
+    uploaded_file = genai.upload_file(audio_file_path, mime_type=get_mime_type(audio_file_path))
     prompt = f"音声ファイルの内容を分析し、営業報告データを抽出してください。テキストメモ優先:\n{text}"
     response = model.generate_content([uploaded_file, prompt])
     return parse_json_response(response.text)
