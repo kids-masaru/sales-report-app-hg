@@ -41,17 +41,22 @@ try:
             
     def setup_pwa():
         # Streamlit serves static files at app/static/filename when enableStaticServing is true
-        # Use root-relative path for better compatibility with iOS and Manifest
+        # Android works with root-relative path, but iOS seems to struggle.
+        # Switching to ABSOLUTE URL for iOS to ensure it finds the image.
+        # Direct URL format: https://{username}-{spacename}.hf.space
+        BASE_URL = "https://helpyu-sales-report-v2.hf.space"
+        
         icon_url = "/app/static/icon.png" 
-        ios_icon_url = "/app/static/apple-touch-icon.png"
+        # Use Absolute URL for iOS
+        ios_icon_url = f"{BASE_URL}/app/static/apple-touch-icon.png"
         manifest_url = "/app/static/manifest.json"
         
         st.markdown(
             f"""
             <link rel="manifest" href="{manifest_url}">
             <link rel="icon" type="image/png" href="{icon_url}">
-            <link rel="apple-touch-icon" sizes="180x180" href="{ios_icon_url}">
-            <link rel="apple-touch-icon-precomposed" href="{ios_icon_url}">
+            <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="{ios_icon_url}">
+            <link rel="apple-touch-icon-precomposed" type="image/png" href="{ios_icon_url}">
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             <meta name="apple-mobile-web-app-title" content="活動記録">
