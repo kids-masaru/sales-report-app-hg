@@ -40,21 +40,28 @@ try:
         f.write(base64.b64decode(IOS_ICON_BASE64))
             
     def setup_pwa():
+    def setup_pwa():
         # Streamlit serves static files at app/static/filename when enableStaticServing is true
-        # On Render, the domain is the app domain itself.
-        # Use simple root-relative path.
+        # Try multiple path patterns to ensure iOS finds it on Render
+        paths_to_try = [
+            "/app/static/apple-touch-icon.png?v=6",
+            "/static/apple-touch-icon.png?v=6",
+            "static/apple-touch-icon.png?v=6"
+        ]
         
-        # Add versioning to force cache refresh
-        icon_url = "/app/static/icon.png?v=5" 
-        ios_icon_url = "/app/static/apple-touch-icon.png?v=5" 
-        manifest_url = "/app/static/manifest.json?v=5"
+        icon_url = "/app/static/icon.png?v=6"
+        manifest_url = "/app/static/manifest.json?v=6"
+        
+        # Build link tags for all paths
+        apple_touch_icons = "\n".join([
+            f'<link rel="apple-touch-icon" sizes="180x180" href="{p}">' for p in paths_to_try
+        ])
         
         st.markdown(
             f"""
             <link rel="manifest" href="{manifest_url}">
             <link rel="icon" type="image/png" href="{icon_url}">
-            <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="{ios_icon_url}">
-            <link rel="apple-touch-icon-precomposed" type="image/png" href="{ios_icon_url}">
+            {apple_touch_icons}
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             <meta name="apple-mobile-web-app-title" content="活動記録">
@@ -134,10 +141,13 @@ APP_PASSWORD = os.environ.get("APP_PASSWORD")
 def check_password():
     """Returns `True` if the user had the correct password."""
 
-    # Bypass if no password is set (e.g. local dev without env)
+    # Bypass if no password is set
     if not APP_PASSWORD:
         return True
 
+    # DEBUG: Show icon to verify file existence (visible on login screen)
+    # st.image("static/apple-touch-icon.png", width=50, caption="Icon Check")
+    
     def password_entered():
         """Checks whether a password entered by the user is correct."""
         if st.session_state["password"] == APP_PASSWORD:
