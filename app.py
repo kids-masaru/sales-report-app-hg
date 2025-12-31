@@ -40,19 +40,13 @@ try:
         f.write(base64.b64decode(IOS_ICON_BASE64))
             
     def setup_pwa():
-        # GitHub Raw URL Strategy
-        # Since the repo is public, we can link directly to the image files on GitHub.
-        # This bypasses any server-side path issues on Render.
+        # Hugging Face Public Space Strategy
+        # Use simple root-relative path. PWA works perfectly in Public Spaces.
+        # Add versioning to force cache refresh on iOS
         
-        REPO_ROOT = "https://raw.githubusercontent.com/kids-masaru/sales-report-app-hg/main"
-        
-        # Add versioning to force cache refresh
-        icon_url = f"{REPO_ROOT}/static/icon.png?v=7"
-        
-        # Ideally we use the raw url for apple-touch-icon too
-        ios_icon_url = f"{REPO_ROOT}/static/apple-touch-icon.png?v=7"
-        
-        manifest_url = "/app/static/manifest.json?v=7"
+        icon_url = "/app/static/icon.png?v=8" 
+        ios_icon_url = "/app/static/apple-touch-icon.png?v=8" 
+        manifest_url = "/app/static/manifest.json?v=8"
         
         st.markdown(
             f"""
