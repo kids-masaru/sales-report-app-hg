@@ -44,9 +44,9 @@ try:
         # Use simple root-relative path. PWA works perfectly in Public Spaces.
         # Add versioning to force cache refresh on iOS
         
-        icon_url = "/app/static/icon.png?v=8" 
-        ios_icon_url = "/app/static/apple-touch-icon.png?v=8" 
-        manifest_url = "/app/static/manifest.json?v=8"
+        icon_url = "/app/static/icon.png?v=9" 
+        ios_icon_url = "/app/static/apple-touch-icon.png?v=9" 
+        manifest_url = "/app/static/manifest.json?v=9"
         
         st.markdown(
             f"""
