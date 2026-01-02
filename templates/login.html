@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>パスワード認証</h2>
+    <form method="POST" action="/login">
+        <label>パスワードを入力してください</label>
+        <input type="password" name="password" required autofocus>
+        <button type="submit" class="btn-primary">ログイン</button>
+    </form>
+</div>
+{% endblock %}

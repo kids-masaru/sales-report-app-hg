@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 import google.generativeai as genai
-import streamlit as st
+
 
 # Load environment variables
 load_dotenv()
@@ -64,7 +64,7 @@ def init_directories():
 
 def init_gemini():
     if not GEMINI_API_KEY:
-        st.error("GEMINI_API_KEY が設定されていません。")
+        print("GEMINI_API_KEY が設定されていません。")
         return False
     genai.configure(api_key=GEMINI_API_KEY)
     return True
@@ -89,7 +89,7 @@ def convert_date_str_safe(date_str: str, default_func=None) -> date:
 
 def search_clients(keyword: str) -> list:
     if not KINTONE_CLIENT_APP_ID or not KINTONE_CLIENT_API_TOKEN:
-        st.error("取引先アプリの設定が不足しています。")
+        print("取引先アプリの設定が不足しています。")
         return []
     url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"
     headers = {"X-Cybozu-API-Token": KINTONE_CLIENT_API_TOKEN}
@@ -251,7 +251,7 @@ def upload_file_to_kintone(file_path: str, file_name: str) -> str:
             response.raise_for_status()
             return response.json().get("fileKey", "")
     except Exception as e:
-        st.warning(f"ファイルアップロードエラー: {e}")
+        print(f"ファイルアップロードエラー: {e}")
         return ""
 
 def upload_to_kintone(data: dict, file_keys: list = None) -> bool:
@@ -283,5 +283,5 @@ def upload_to_kintone(data: dict, file_keys: list = None) -> bool:
         requests.post(url, headers=headers, data=json.dumps(payload, ensure_ascii=False).encode('utf-8')).raise_for_status()
         return True
     except Exception as e:
-        st.error(f"Error: {e}")
+        print(f"Error: {e}")
         return False

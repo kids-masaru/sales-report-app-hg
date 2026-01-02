@@ -1,186 +1,122 @@
-import streamlit as st
-import base64
-import io
-from PIL import Image
 
-# Page Configuration Setup using Custom Icon
-try:
-    from icon_data import ICON_BASE64
-    # Convert Base64 back to PIL Image for st.set_page_config
-    icon_bytes = base64.b64decode(ICON_BASE64)
-    icon_image = Image.open(io.BytesIO(icon_bytes))
-    page_icon_config = icon_image
-except:
-    page_icon_config = "📝"
-
-st.set_page_config(
-    page_title="活動記録作成",
-    page_icon=page_icon_config,
-    layout="centered"
+import os
+import secrets
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from werkzeug.utils import secure_filename
+from utils import (
+    process_audio_only, process_text_only, process_audio_and_text,
+    upload_file_to_kintone, upload_to_kintone, save_audio_file,
+    STAFF_OPTIONS, SALES_ACTIVITY_OPTIONS, init_gemini
 )
 
-# PWA & Icon Setup
-try:
-    from icon_data import ICON_BASE64, IOS_ICON_BASE64
-    import os
-    
-    # Ensure static directory exists and save icon
-    if not os.path.exists("static"):
-        os.makedirs("static")
-    
-    icon_path = "static/icon.png"
-    ios_icon_path = "static/apple-touch-icon.png"
-    
-    # Always overwrite to ensure latest icon
-    with open(icon_path, "wb") as f:
-        f.write(base64.b64decode(ICON_BASE64))
-        
-    # Save iOS icon
-    with open(ios_icon_path, "wb") as f:
-        f.write(base64.b64decode(IOS_ICON_BASE64))
-            
-    def setup_pwa():
-        # Hugging Face Public Space Strategy
-        # Use simple root-relative path. PWA works perfectly in Public Spaces.
-        # Add versioning to force cache refresh on iOS
-        
-        icon_url = "static/icon.png?v=10" 
-        ios_icon_url = "static/apple-touch-icon.png?v=10" 
-        manifest_url = "static/manifest.json?v=10"
-        
-        st.markdown(
-            f"""
-            <link rel="manifest" href="{manifest_url}">
-            <link rel="icon" type="image/png" href="{icon_url}">
-            <link rel="apple-touch-icon" sizes="180x180" href="{ios_icon_url}">
-            <link rel="apple-touch-icon-precomposed" href="{ios_icon_url}">
-            <meta name="apple-mobile-web-app-capable" content="yes">
-            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-            <meta name="apple-mobile-web-app-title" content="活動記録">
-            <style>
-            /* Hide Streamlit elements */
-            #MainMenu {{visibility: hidden;}}
-            header {{visibility: hidden;}}
-            footer {{visibility: hidden;}}
-            /* Header adjustments: Hide default title from st.Page if possible, otherwise just hide stAppHeader */
-            .stAppHeader {{display: none;}}
-            
-            /* Custom styling for SVG headers */
-            .custom-svg-header {{
-                display: flex;
-                align_items: center;
-                gap: 10px;
-                padding-bottom: 20px;
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-    setup_pwa()
-except Exception as e:
-    pass
+app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
-# User requested removal of redundant titles (st.header was here)# Common CSS (Global)
-st.markdown("""
-<style>
-    /* CSS for compact UI and consistent headers */
-    h1 { font-size: 1.5rem !important; margin-bottom: 0.5rem !important; }
-    h2 { font-size: 1.2rem !important; margin-top: 1rem !important; margin-bottom: 0.5rem !important; }
-    h3 { font-size: 1.0rem !important; margin-top: 0.5rem !important; }
-    .block-container { padding-top: 2rem !important; padding-bottom: 2rem !important; }
-    /* Button styles */
-    .stButton button { width: 100%; border-radius: 8px; font-weight: bold; }
-    
-    /* Expander styling: Remove arrow, border, and make it subtle */
-    div[data-testid="stExpander"] {
-        border: none !important;
-        box-shadow: none !important;
-        background-color: transparent !important;
-        margin-top: 0 !important;
-    }
-    div[data-testid="stExpander"] details > summary {
-        list-style: none !important; /* Hide list marker */
-        padding-left: 0 !important;
-    }
-    div[data-testid="stExpander"] details > summary::-webkit-details-marker {
-        display: none !important; /* Hide webkit marker */
-    }
-    div[data-testid="stExpander"] details > summary > svg {
-        display: none !important; /* Hide SVG arrow */
-    }
-    div[data-testid="stExpander"] details summary p { 
-        font-size: 0.8rem !important; 
-        color: #888; 
-        font-weight: normal !important;
-        text-decoration: underline;
-        cursor: pointer;
-    }
-    div[data-testid="stExpander"] details summary:hover p {
-        color: #555;
-    }
-</style>
-""", unsafe_allow_html=True)
+# --- Configuration ---
+# Password from env
+APP_PASSWORD = os.environ.get("APP_PASSWORD", "")
+UPLOAD_FOLDER = 'saved_audio'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ---------------------------------------------------------
-# Simple Authentication Logic for Public Deployment (Render)
-# ---------------------------------------------------------
-import os
+# --- Routes ---
 
-# 1. Get password from env (Set this in Render Environment Variables)
-APP_PASSWORD = os.environ.get("APP_PASSWORD")
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('static', filename)
 
-# 2. Check auth
-def check_password():
-    """Returns `True` if the user had the correct password."""
+@app.before_request
+def check_auth():
+    # Allow static resources to be served without login (for icon loading on iOS)
+    if request.endpoint == 'serve_static':
+        return
+    if request.endpoint == 'login':
+        return
+    if APP_PASSWORD and not session.get('authenticated'):
+        return redirect(url_for('login'))
 
-    # Bypass if no password is set
-    if not APP_PASSWORD:
-        return True
-
-    # DEBUG: Show icon to verify file existence (visible on login screen)
-    # st.image("static/apple-touch-icon.png", width=50, caption="Icon Check")
-    
-    def password_entered():
-        """Checks whether a password entered by the user is correct."""
-        if st.session_state["password"] == APP_PASSWORD:
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]  # Don't store password
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == APP_PASSWORD:
+            session['authenticated'] = True
+            return redirect(url_for('index'))
         else:
-            st.session_state["password_correct"] = False
+            flash('パスワードが違います', 'error')
+    return render_template('login.html')
 
-    if "password_correct" not in st.session_state:
-        # First run, show input
-        st.text_input(
-            "パスワードを入力してください", type="password", on_change=password_entered, key="password"
-        )
-        return False
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html', staff_options=STAFF_OPTIONS)
+
+@app.route('/process', methods=['POST'])
+def process():
+    if not init_gemini():
+        flash('Gemini APIの設定エラーが発生しました', 'error')
+        return redirect(url_for('index'))
+
+    text_input = request.form.get('text_input', '').strip()
+    audio_file = request.files.get('audio_file')
+    staff_name = request.form.get('staff_name')
+
+    if not audio_file and not text_input:
+        flash('音声ファイルまたはテキストを入力してください', 'error')
+        return redirect(url_for('index'))
+
+    saved_path = None
+    try:
+        data = {}
+        if audio_file and audio_file.filename != '':
+            # Save file
+            saved_path = save_audio_file(audio_file)
+            
+            if text_input:
+                data = process_audio_and_text(saved_path, text_input)
+            else:
+                data = process_audio_only(saved_path)
+        elif text_input:
+            data = process_text_only(text_input)
+
+        if not data:
+            flash('AIによる抽出に失敗しました', 'error')
+            return redirect(url_for('index'))
+            
+        # Success -> Confirm Page
+        # Pass data via hidden fields or session? Passing via render_template is simplest.
+        # But we need POST to save. render confirm.html
+        return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS)
+
+    except Exception as e:
+        flash(f"エラーが発生しました: {str(e)}", 'error')
+        return redirect(url_for('index'))
+
+@app.route('/save', methods=['POST'])
+def save():
+    # Gather data from form
+    form_data = request.form.to_dict()
+    file_path = form_data.pop('file_path', '')
+    staff_name = form_data.pop('staff_name', '')
     
-    elif not st.session_state["password_correct"]:
-        # Password incorrect, show input again
-        st.text_input(
-            "パスワードを入力してください", type="password", on_change=password_entered, key="password"
-        )
-        st.error("😕 パスワードが違います")
-        return False
+    # Reconstruct data dict for kintone
+    data = form_data
+    # Add staff info if needed by utils (it is, see utils.py:264)
+    data['対応者'] = staff_name
+
+    file_keys = []
+    if file_path and os.path.exists(file_path):
+        fk = upload_file_to_kintone(file_path, os.path.basename(file_path))
+        if fk:
+            file_keys.append(fk)
     
+    success = upload_to_kintone(data, file_keys)
+    
+    if success:
+        flash('Kintoneに正常に登録されました！', 'success')
     else:
-        # Password correct
-        return True
+        flash('Kintoneへの登録に失敗しました...', 'error')
+        
+    return redirect(url_for('index'))
 
-if not check_password():
-    st.stop()
-# ---------------------------------------------------------
-
-# Logo (Sidebar top)
-# st.logo removed
-
-# Navigation
-pages = {
-    "メニュー": [
-        st.Page("views/activity.py", title="活動記録"),
-        st.Page("views/qa.py", title="質疑応答抽出"),
-    ]
-}
-
-pg = st.navigation(pages)
-pg.run()
+if __name__ == '__main__':
+    # For local dev
+    app.run(debug=True, port=8501, host='0.0.0.0')

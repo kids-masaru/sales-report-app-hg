@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>抽出結果の確認</h2>
+    <form method="POST" action="/save" onsubmit="showLoading()">
+        <input type="hidden" name="file_path" value="{{ file_path }}">
+        <input type="hidden" name="staff_name" value="{{ staff_name }}">
+
+        <!-- Editable Fields -->
+        {% for key, value in data.items() %}
+        <label>{{ key }}</label>
+        {% if key in ["商談内容", "現在の課題・問題点", "競合・マーケット情報"] %}
+        <textarea name="{{ key }}">{{ value }}</textarea>
+        {% elif key == "新規営業件名" or key == "次回営業件名" %}
+        <select name="{{ key }}">
+            <option value="">(未選択)</option>
+            {% for opt in sales_options %}
+            <option value="{{ opt }}" {% if opt==value %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        <input type="text" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+        {% endfor %}
+
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn-primary">Kintoneに登録</button>
+        </div>
+    </form>
+    <div style="text-align:center; margin-top:15px;">
+        <a href="/" style="color:#888; text-decoration:none;">戻る（破棄）</a>
+    </div>
+</div>
+{% endblock %}
