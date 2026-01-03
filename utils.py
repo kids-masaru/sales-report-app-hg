@@ -308,7 +308,20 @@ def process_audio_only(audio_file_path: str, mode: str = "sales") -> dict:
     sys_instruct = prompt_func(get_current_date_str())
     
     # Upload file
-    uploaded_file = client.files.upload(file=audio_file_path)
+    # Upload file
+    mime = get_mime_type(audio_file_path)
+    print(f"Uploading file: {audio_file_path} with mime_type: {mime}")
+    try:
+        # Try passing mime_type directly as suggested by error
+        uploaded_file = client.files.upload(file=audio_file_path, config={'mime_type': mime})
+    except Exception as e:
+        print(f"Upload with config failed, trying direct arg: {e}")
+        # Build config object explicitly if possible, or try direct arg if SDK supports it loosely
+        # But for now, let's stick to the most likely working signature for 0.6+
+        # If 'config' failed, maybe it expects a type. Let's try passing mime_type directly if the first failed or just stick to one robust way.
+        # Actually, let's just REPLACE the previous attempt with the new hypothesis.
+        # Based on error "set the `mime_type` argument", likely `upload(..., mime_type=)`
+        uploaded_file = client.files.upload(file=audio_file_path, mime_type=mime)
     
     prompt = "この音声ファイルの内容を聞き取り、データを抽出してください。"
     
@@ -343,7 +356,9 @@ def process_audio_and_text(audio_file_path: str, text: str, mode: str = "sales")
     prompt_func = get_qa_extraction_prompt if mode == "qa" else get_extraction_prompt
     sys_instruct = prompt_func(get_current_date_str())
     
-    uploaded_file = client.files.upload(file=audio_file_path)
+    mime = get_mime_type(audio_file_path)
+    print(f"Uploading file: {audio_file_path} with mime_type: {mime}")
+    uploaded_file = client.files.upload(file=audio_file_path, mime_type=mime)
     
     prompt = f"音声ファイルの内容を分析し、データを抽出してください。テキストメモ優先:\n{text}"
     
