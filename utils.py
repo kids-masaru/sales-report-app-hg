@@ -343,7 +343,7 @@ def process_audio_and_text(audio_file_path: str, text: str, mode: str = "sales")
     prompt_func = get_qa_extraction_prompt if mode == "qa" else get_extraction_prompt
     sys_instruct = prompt_func(get_current_date_str())
     
-    uploaded_file = client.files.upload(path=audio_file_path)
+    uploaded_file = client.files.upload(file=audio_file_path)
     
     prompt = f"音声ファイルの内容を分析し、データを抽出してください。テキストメモ優先:\n{text}"
     
