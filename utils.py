@@ -19,7 +19,7 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Using 2.0 Flash as standard efficient model, user's 2.5 might be invalid
-GEMINI_MODEL = "gemini-2.0-flash-exp" 
+GEMINI_MODEL = "gemini-3-flash-preview" 
 
 # Kintone API Configuration
 KINTONE_SUBDOMAIN = os.getenv("KINTONE_SUBDOMAIN")
