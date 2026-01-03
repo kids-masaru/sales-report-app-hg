@@ -108,6 +108,28 @@ def search_clients(keyword: str) -> list:
 def get_current_date_str():
     return datetime.now().strftime("%Y-%m-%d")
 
+def calculate_smart_next_date(base_date_str: str) -> str:
+    """
+    3日後を計算。土日なら翌月曜日までスキップする。
+    """
+    try:
+        if not base_date_str: base = date.today()
+        else: base = datetime.strptime(base_date_str, "%Y-%m-%d").date()
+    except:
+        base = date.today()
+        
+    # 3日後
+    target = base + timedelta(days=3)
+    
+    # 曜日チェック (0=Mon, 6=Sun). 5=Sat, 6=Sun
+    # 土曜(5)なら+2日(月曜), 日曜(6)なら+1日(月曜)
+    if target.weekday() == 5: # Sat
+        target += timedelta(days=2)
+    elif target.weekday() == 6: # Sun
+        target += timedelta(days=1)
+        
+    return target.strftime("%Y-%m-%d")
+
 def get_extraction_prompt(current_date_str: str):
     # f-stringでのJSON出力には {{ }} でのエスケープが必要です
     return f"""
