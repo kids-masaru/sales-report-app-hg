@@ -18,7 +18,7 @@
         {% for key, value in data.items() %}
         {% if key != '取引先ID' and key != '取引先名' %}
         <label>{{ key }}</label>
-        {% elif key == "qa_list" %}
+        {% if key == "qa_list" %}
         <div style="background:#f9fafb; padding:15px; border-radius:8px; border:1px solid #e5e7eb;">
             {% for item in value %}
             <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
