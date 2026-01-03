@@ -21,11 +21,42 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Using 2.0 Flash as standard efficient model, user's 2.5 might be invalid
 GEMINI_MODEL = "gemini-2.0-flash-exp" 
 
-# ... (Kintone config)
+# Kintone API Configuration
+KINTONE_SUBDOMAIN = os.getenv("KINTONE_SUBDOMAIN")
+KINTONE_APP_ID = os.getenv("KINTONE_APP_ID")
+KINTONE_API_TOKEN = os.getenv("KINTONE_API_TOKEN")
+KINTONE_CLIENT_APP_ID = os.getenv("KINTONE_CLIENT_APP_ID")
+KINTONE_CLIENT_API_TOKEN = os.getenv("KINTONE_CLIENT_API_TOKEN")
 
-# ... (Directories)
+SAVED_AUDIO_DIR = Path("./saved_audio")
 
-# ... (Master Data)
+# =============================================================================
+# MASTER DATA
+# =============================================================================
+
+SALES_ACTIVITY_OPTIONS = [
+    "架電、メール", "アポ架電（担当者通電）", "初回訪問", "提案（担当者訪問）", 
+    "提案（見積書提出）", "提案（決裁者訪問・プレゼン）", "合意後訪問（商談）", 
+    "訪問（公示前）", "公示対応（提案書提出）", "公示対応（プレゼン参加）", 
+    "公示対応（入札・開封）", "合意後訪問（公示）",
+]
+
+STAFF_OPTIONS = [
+    "水野 邦彦", "杉山 拓真", "一條 祐輔", "堀越 隆太郎", "矢部 昌子", 
+    "鈴木 沙耶佳", "井﨑 優", "鈴木 智朗", "中村 紀夫",
+]
+
+STAFF_CODE_MAP = {
+    "水野 邦彦": "mizuno.k@kids-21.co.jp",
+    "杉山 拓真": "sugiyama.t@kids-21.co.jp",
+    "一條 祐輔": "ichijo.y@kids-21.co.jp",
+    "堀越 隆太郎": "horikoshi.r@kids-21.co.jp",
+    "矢部 昌子": "yabe.m@kids-21.co.jp",
+    "鈴木 沙耶佳": "suzuki.sayaka@kids-21.co.jp",
+    "井﨑 優": "izaki.m@kids-21.co.jp",
+    "鈴木 智朗": "suzuki.tomoaki@kids-21.co.jp",
+    "中村 紀夫": "nakamura.norio@kids-21.co.jp",
+}
 
 # =============================================================================
 # FUNCTIONS
