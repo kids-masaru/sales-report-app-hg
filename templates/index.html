@@ -30,7 +30,7 @@
         </div>
 
         <!-- Client Search -->
-        <div class="input-group">
+        <div class="input-group" id="clientSearchGroup">
             <label><i class="fas fa-building"></i> クライアント名 (検索)</label>
             <div style="position:relative;">
                 <input type="text" id="clientSearchInput" placeholder="会社名を入力して検索..." autocomplete="off">
@@ -43,7 +43,7 @@
         </div>
 
         <!-- Staff Select (Moved up for quick access) -->
-        <div class="input-group">
+        <div class="input-group" id="staffSelectGroup">
             <label><i class="fas fa-user-tie"></i> 対応者</label>
             <div style="position:relative;">
                 <select name="staff_name" id="staffSelect">
@@ -95,6 +95,14 @@
 
             document.getElementById('label_qa').style.background = !isSales ? 'white' : 'transparent';
             document.getElementById('label_qa').style.color = !isSales ? 'var(--primary)' : 'var(--text-sub)';
+
+            // Toggle Input Groups
+            const displayStyle = isSales ? 'block' : 'none';
+            const clientGroup = document.getElementById('clientSearchGroup');
+            const staffGroup = document.getElementById('staffSelectGroup');
+
+            if (clientGroup) clientGroup.style.display = displayStyle;
+            if (staffGroup) staffGroup.style.display = displayStyle;
         }
 
         // Client Search Logic
