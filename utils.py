@@ -194,6 +194,45 @@ def get_extraction_prompt(current_date_str: str):
 ```
 """
 
+def get_qa_extraction_prompt(current_date_str: str):
+    return f"""
+あなたは議事録作成のエキスパートAIです。
+入力された商談の文字起こしやメモ情報から、以下のフィールドを厳密なJSON形式で抽出してください。
+
+## 目的
+商談の中で行われた「質疑応答（Q&A）」を抽出し、ナレッジとして蓄積するため。
+
+## 前提条件
+- **現在日時**: {current_date_str}
+- **自社名**: 株式会社キッズコーポレーション
+
+## フィールド抽出ルール
+
+### 1. 質疑応答リスト (qa_list)
+- 商談の中でクライアントから出た「質問」と、それに対する自社の「回答」をペアで抽出してください。
+- 挨拶や雑談は除外し、業務に関連する内容のみ抽出してください。
+- **構成**:
+  - question: 相手からの質問、疑問、確認事項
+  - answer: こちらの回答、説明内容
+
+### 2. 対応日 (action_date)
+活動日付 (YYYY-MM-DD)。不明時は本日({current_date_str})。
+
+## 出力形式
+```json
+{{
+    "対応日": "YYYY-MM-DD",
+    "qa_list": [
+        {{
+            "question": "...",
+            "answer": "..."
+        }},
+        ...
+    ]
+}}
+```
+"""
+
 def parse_json_response(response_text: str) -> dict:
     try:
         if "```json" in response_text: json_str = response_text.split("```json")[1].split("```")[0].strip()
@@ -215,23 +254,26 @@ def get_mime_type(file_path: str) -> str:
     elif ext == ".ogg": return "audio/ogg"
     else: return "audio/mp3" # Fallback
 
-def process_audio_only(audio_file_path: str) -> dict:
-    model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=get_extraction_prompt(get_current_date_str()))
+def process_audio_only(audio_file_path: str, mode: str = "sales") -> dict:
+    prompt_func = get_qa_extraction_prompt if mode == "qa" else get_extraction_prompt
+    model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=prompt_func(get_current_date_str()))
     uploaded_file = genai.upload_file(audio_file_path, mime_type=get_mime_type(audio_file_path))
-    prompt = "この音声ファイルの内容を聞き取り、営業報告データを抽出してください。"
+    prompt = "この音声ファイルの内容を聞き取り、データを抽出してください。"
     response = model.generate_content([uploaded_file, prompt])
     return parse_json_response(response.text)
 
-def process_text_only(text: str) -> dict:
-    model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=get_extraction_prompt(get_current_date_str()))
-    prompt = f"以下のテキストから営業報告データを抽出してください:\n\n{text}"
+def process_text_only(text: str, mode: str = "sales") -> dict:
+    prompt_func = get_qa_extraction_prompt if mode == "qa" else get_extraction_prompt
+    model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=prompt_func(get_current_date_str()))
+    prompt = f"以下のテキストからデータを抽出してください:\n\n{text}"
     response = model.generate_content(prompt)
     return parse_json_response(response.text)
 
-def process_audio_and_text(audio_file_path: str, text: str) -> dict:
-    model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=get_extraction_prompt(get_current_date_str()))
+def process_audio_and_text(audio_file_path: str, text: str, mode: str = "sales") -> dict:
+    prompt_func = get_qa_extraction_prompt if mode == "qa" else get_extraction_prompt
+    model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=prompt_func(get_current_date_str()))
     uploaded_file = genai.upload_file(audio_file_path, mime_type=get_mime_type(audio_file_path))
-    prompt = f"音声ファイルの内容を分析し、営業報告データを抽出してください。テキストメモ優先:\n{text}"
+    prompt = f"音声ファイルの内容を分析し、データを抽出してください。テキストメモ優先:\n{text}"
     response = model.generate_content([uploaded_file, prompt])
     return parse_json_response(response.text)
 

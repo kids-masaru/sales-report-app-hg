@@ -1,12 +1,12 @@
 
 import os
 import secrets
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 from utils import (
     process_audio_only, process_text_only, process_audio_and_text,
     upload_file_to_kintone, upload_to_kintone, save_audio_file,
-    STAFF_OPTIONS, SALES_ACTIVITY_OPTIONS, init_gemini
+    STAFF_OPTIONS, SALES_ACTIVITY_OPTIONS, init_gemini, search_clients
 )
 
 app = Flask(__name__)
@@ -43,7 +43,16 @@ def login():
             return redirect(url_for('index'))
         else:
             flash('パスワードが違います', 'error')
+            flash('パスワードが違います', 'error')
     return render_template('login.html')
+
+@app.route('/api/search_clients', methods=['GET'])
+def search_clients_route():
+    keyword = request.args.get('q', '')
+    if not keyword:
+        return jsonify([])
+    results = search_clients(keyword)
+    return jsonify(results)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -64,6 +73,9 @@ def process():
     text_input = request.form.get('text_input', '').strip()
     audio_file = request.files.get('audio_file')
     staff_name = request.form.get('staff_name')
+    client_id = request.form.get('client_id', '')
+    client_name = request.form.get('client_name', '')
+    mode = request.form.get('mode', 'sales') # sales or qa
 
     if not audio_file and not text_input:
         flash('音声ファイルまたはテキストを入力してください', 'error')
@@ -77,18 +89,23 @@ def process():
             saved_path = save_audio_file(audio_file)
             
             if text_input:
-                data = process_audio_and_text(saved_path, text_input)
+                data = process_audio_and_text(saved_path, text_input, mode)
             else:
-                data = process_audio_only(saved_path)
+                data = process_audio_only(saved_path, mode)
         elif text_input:
-            data = process_text_only(text_input)
+            data = process_text_only(text_input, mode)
 
         if not data:
             flash('AIによる抽出に失敗しました', 'error')
             return redirect(url_for('index'))
+         
+        # Inject client info if available
+        if client_id:
+            data['取引先ID'] = client_id
+            data['取引先名'] = client_name # For display
             
         # Success -> Confirm Page
-        return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS)
+        return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS, mode=mode)
 
     except Exception as e:
         flash(f"エラーが発生しました: {str(e)}", 'error')
