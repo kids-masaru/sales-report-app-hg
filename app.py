@@ -47,6 +47,12 @@ def login():
 
 @app.route('/', methods=['GET'])
 def index():
+    # Trying root-relative without /app prefix which was HF specific.
+    # Bump version to 13
+    icon_url = "/static/icon.png?v=13" 
+    ios_icon_url = "/static/apple-touch-icon.png?v=13" 
+    manifest_url = "/static/manifest.json?v=13"
+    
     return render_template('index.html', staff_options=STAFF_OPTIONS)
 
 @app.route('/process', methods=['POST'])
@@ -82,8 +88,6 @@ def process():
             return redirect(url_for('index'))
             
         # Success -> Confirm Page
-        # Pass data via hidden fields or session? Passing via render_template is simplest.
-        # But we need POST to save. render confirm.html
         return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS)
 
     except Exception as e:

@@ -1,48 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-    <h2><i class="fas fa-magic"></i> 新規報告作成</h2>
-    <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:24px;">
-        音声ファイルまたはメモからAIが日報を自動生成します。
-    </p>
-
     <form method="POST" action="/process" enctype="multipart/form-data" onsubmit="showLoading()">
 
-        <!-- Modern File Upload Area -->
+        <!-- Modern File Upload Area (Compact) -->
         <div class="file-upload-wrapper">
             <input type="file" name="audio_file" class="file-upload-input"
                 accept=".mp3,.wav,.m4a,.webm,.aac,.flac,.ogg">
             <div class="file-upload-content">
-                <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
-                <div class="file-upload-text">音声をアップロード</div>
-                <div class="file-upload-sub">タップしてファイルを選択</div>
+                <i class="fas fa-microphone-alt file-upload-icon"></i>
+                <div class="file-upload-text">音声 / ファイルを選択</div>
             </div>
         </div>
 
-        <!-- Text Area with Icon -->
-        <div class="input-group">
-            <label><i class="fas fa-pen"></i> テキストメモ (任意)</label>
-            <textarea name="text_input"
-                placeholder="入力例：&#13;&#10;・キッズ保育園に訪問&#13;&#10;・園長と面談し来年度の定員についてヒアリング..."></textarea>
-        </div>
-
-        <!-- Staff Select -->
+        <!-- Staff Select (Moved up for quick access) -->
         <div class="input-group">
             <label><i class="fas fa-user-tie"></i> 対応者</label>
             <div style="position:relative;">
-                <select name="staff_name">
+                <select name="staff_name" id="staffSelect">
                     {% for staff in staff_options %}
                     <option value="{{ staff }}" {% if staff=="水野 邦彦" %}selected{% endif %}>{{ staff }}</option>
                     {% endfor %}
                 </select>
                 <i class="fas fa-chevron-down"
-                    style="position:absolute; right:15px; top:18px; color:var(--text-sub); pointer-events:none;"></i>
+                    style="position:absolute; right:12px; top:14px; color:var(--text-sub); pointer-events:none; font-size:0.8rem;"></i>
             </div>
         </div>
 
+        <!-- Text Area -->
+        <div class="input-group">
+            <label><i class="fas fa-pen"></i> メモ (任意)</label>
+            <textarea name="text_input" placeholder="訪問先や内容のメモ..." style="height: 80px;"></textarea>
+        </div>
+
         <button type="submit" class="btn-primary">
-            <i class="fas fa-robot"></i> AIで日報を作成する
+            <i class="fas fa-paper-plane"></i> 日報を作成
         </button>
     </form>
 </div>
+
+<script>
+    // Persistent Staff Selection
+    document.addEventListener('DOMContentLoaded', function () {
+        const staffSelect = document.getElementById('staffSelect');
+        const STORAGE_KEY = 'sales_report_last_staff';
+
+        if (staffSelect) {
+            // Restore
+            const lastStaff = localStorage.getItem(STORAGE_KEY);
+            if (lastStaff) {
+                staffSelect.value = lastStaff;
+            }
+
+            // Save on change and submit
+            const saveStaff = () => localStorage.setItem(STORAGE_KEY, staffSelect.value);
+            staffSelect.addEventListener('change', saveStaff);
+            staffSelect.form.addEventListener('submit', saveStaff);
+        }
+    });
+</script>
 {% endblock %}
