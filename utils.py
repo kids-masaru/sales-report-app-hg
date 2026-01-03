@@ -72,12 +72,30 @@ def init_gemini():
 def save_audio_file(uploaded_file) -> str:
     init_directories()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    original_name = Path(uploaded_file.name).stem
-    extension = Path(uploaded_file.name).suffix
+    # Use .filename for the original filename, .name is the form field name
+    filename_attr = getattr(uploaded_file, 'filename', uploaded_file.name)
+    original_name = Path(filename_attr).stem
+    extension = Path(filename_attr).suffix
+    if not extension: # Fallback if no extension
+        extension = ".mp3"
+        
     filename = f"{timestamp}_{original_name}{extension}"
     file_path = SAVED_AUDIO_DIR / filename
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.getvalue())
+    
+    # Use .save() for FileStorage objects (Flask/Werkzeug)
+    if hasattr(uploaded_file, 'save'):
+        uploaded_file.save(str(file_path))
+    else:
+        # Fallback for BytesIO or other objects (e.g. testing)
+        with open(file_path, "wb") as f:
+            if hasattr(uploaded_file, 'getbuffer'):
+                f.write(uploaded_file.getbuffer())
+            elif hasattr(uploaded_file, 'read'):
+                uploaded_file.seek(0)
+                f.write(uploaded_file.read())
+            elif hasattr(uploaded_file, 'getvalue'):
+                f.write(uploaded_file.getvalue())
+                
     return str(file_path)
 
 def convert_date_str_safe(date_str: str, default_func=None) -> date:
