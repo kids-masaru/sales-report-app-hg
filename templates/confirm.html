@@ -7,9 +7,9 @@
         <input type="hidden" name="staff_name" value="{{ staff_name }}">
 
         <!-- Editable Fields -->
-        {% if data.get('取引先名') %}
+        {% if mode != 'qa' and data.get('取引先名') %}
         <div style="background:#f0f9ff; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #bae6fd;">
-            <label style="color:#0369a1; font-size:0.8rem;">取引先</label>
+            <label style="color:#0369a1; font-size:0.8rem;">クライアント名</label>
             <div style="font-weight:bold; color:#0284c7;">{{ data['取引先名'] }}</div>
             <input type="hidden" name="取引先ID" value="{{ data.get('取引先ID', '') }}">
         </div>
@@ -19,7 +19,7 @@
         {% if key != '取引先ID' and key != '取引先名' %}
         <label>{{ key }}</label>
         {% if key == "qa_list" %}
-        <!-- Simple JSON display for QA (could be improved) -->
+        <!-- Simple JSON display for QA -->
         <textarea name="{{ key }}" rows="10">{{ value | tojson(indent=2) }}</textarea>
         {% elif key in ["商談内容", "現在の課題・問題点", "競合・マーケット情報"] %}
         <textarea name="{{ key }}">{{ value }}</textarea>
@@ -32,6 +32,7 @@
         </select>
         {% else %}
         <input type="text" name="{{ key }}" value="{{ value }}">
+        {% endif %}
         {% endif %}
         {% endfor %}
 
