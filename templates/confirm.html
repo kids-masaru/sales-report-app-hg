@@ -28,7 +28,7 @@
             {% endfor %}
         </div>
         <!-- Raw data hidden just in case -->
-        <textarea name="{{ key }}" style="display:none;">{{ value | tojson(ensure_ascii=False) }}</textarea>
+        <textarea name="{{ key }}" style="display:none;">{{ value | tojson }}</textarea>
         {% elif key in ["商談内容", "現在の課題・問題点", "競合・マーケット情報"] %}
         <textarea name="{{ key }}">{{ value }}</textarea>
         {% elif key == "新規営業件名" or key == "次回営業件名" %}
