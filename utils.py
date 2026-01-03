@@ -265,15 +265,15 @@ def get_qa_extraction_prompt(current_date_str: str):
 
 ## 出力形式
 ```json
-{
+{{
     "qa_list": [
-        {
+        {{
             "question": "...",
             "answer": "..."
-        },
+        }},
         ...
     ]
-}
+}}
 ```
 """
 
