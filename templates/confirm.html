@@ -18,9 +18,17 @@
         {% for key, value in data.items() %}
         {% if key != '取引先ID' and key != '取引先名' %}
         <label>{{ key }}</label>
-        {% if key == "qa_list" %}
-        <!-- Simple JSON display for QA -->
-        <textarea name="{{ key }}" rows="10">{{ value | tojson(indent=2) }}</textarea>
+        {% elif key == "qa_list" %}
+        <div style="background:#f9fafb; padding:15px; border-radius:8px; border:1px solid #e5e7eb;">
+            {% for item in value %}
+            <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
+                <div style="font-weight:bold; color:#0369a1; margin-bottom:5px;">Q. {{ item.question }}</div>
+                <div style="line-height:1.6;">A. {{ item.answer }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Raw data hidden just in case -->
+        <textarea name="{{ key }}" style="display:none;">{{ value | tojson(ensure_ascii=False) }}</textarea>
         {% elif key in ["商談内容", "現在の課題・問題点", "競合・マーケット情報"] %}
         <textarea name="{{ key }}">{{ value }}</textarea>
         {% elif key == "新規営業件名" or key == "次回営業件名" %}
