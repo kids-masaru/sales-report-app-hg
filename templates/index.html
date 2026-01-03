@@ -83,10 +83,8 @@
 
             // Save on change and submit
             const saveStaff = () => localStorage.setItem(STORAGE_KEY, staffSelect.value);
-            staffSelect.addEventListener('change', saveStaff);
             staffSelect.form.addEventListener('submit', saveStaff);
         }
-    }
 
         // Mode UI Toggle
         window.updateModeUI = function () {
@@ -100,50 +98,50 @@
 
         // Client Search Logic
         const clientInput = document.getElementById('clientSearchInput');
-    const resultsDiv = document.getElementById('searchResults');
-    let debounceTimer;
+        const resultsDiv = document.getElementById('searchResults');
+        let debounceTimer;
 
-    clientInput.addEventListener('input', function () {
-        clearTimeout(debounceTimer);
-        const query = this.value;
-        if (query.length < 2) {
-            resultsDiv.style.display = 'none';
-            return;
-        }
+        clientInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const query = this.value;
+            if (query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
 
-        debounceTimer = setTimeout(() => {
-            fetch(`/api/search_clients?q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => {
-                    resultsDiv.innerHTML = '';
-                    if (data.length === 0) {
-                        resultsDiv.style.display = 'none';
-                        return;
-                    }
-                    data.forEach(client => {
-                        const div = document.createElement('div');
-                        div.style.padding = '10px';
-                        div.style.borderBottom = '1px solid #eee';
-                        div.textContent = client.name;
-                        div.onclick = () => {
-                            clientInput.value = client.name;
-                            document.getElementById('client_id').value = client.record_id; // Using record_id for Kintone
-                            document.getElementById('client_name').value = client.name;
+            debounceTimer = setTimeout(() => {
+                fetch(`/api/search_clients?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        resultsDiv.innerHTML = '';
+                        if (data.length === 0) {
                             resultsDiv.style.display = 'none';
-                        };
-                        resultsDiv.appendChild(div);
+                            return;
+                        }
+                        data.forEach(client => {
+                            const div = document.createElement('div');
+                            div.style.padding = '10px';
+                            div.style.borderBottom = '1px solid #eee';
+                            div.textContent = client.name;
+                            div.onclick = () => {
+                                clientInput.value = client.name;
+                                document.getElementById('client_id').value = client.record_id; // Using record_id for Kintone
+                                document.getElementById('client_name').value = client.name;
+                                resultsDiv.style.display = 'none';
+                            };
+                            resultsDiv.appendChild(div);
+                        });
+                        resultsDiv.style.display = 'block';
                     });
-                    resultsDiv.style.display = 'block';
-                });
-        }, 300);
-    });
+            }, 300);
+        });
 
-    // Hide results on click outside
-    document.addEventListener('click', function (e) {
-        if (e.target !== clientInput && e.target !== resultsDiv) {
-            resultsDiv.style.display = 'none';
-        }
-    });
+        // Hide results on click outside
+        document.addEventListener('click', function (e) {
+            if (e.target !== clientInput && e.target !== resultsDiv) {
+                resultsDiv.style.display = 'none';
+            }
+        });
     });
 </script>
 {% endblock %}
