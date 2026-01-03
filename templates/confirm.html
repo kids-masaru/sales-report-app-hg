@@ -37,7 +37,12 @@
         {% endfor %}
 
         <div style="margin-top: 20px;">
+            {% if mode != 'qa' %}
             <button type="submit" class="btn-primary">Kintoneに登録</button>
+            {% else %}
+            <a href="/" class="btn-primary"
+                style="display:inline-block; text-decoration:none; background:#888;">トップに戻る</a>
+            {% endif %}
         </div>
     </form>
     <div style="text-align:center; margin-top:15px;">

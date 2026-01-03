@@ -129,12 +129,13 @@ def save():
         if fk:
             file_keys.append(fk)
     
-    success = upload_to_kintone(data, file_keys)
+    success, error_msg = upload_to_kintone(data, file_keys)
     
     if success:
         flash('Kintoneに正常に登録されました！', 'success')
     else:
-        flash('Kintoneへの登録に失敗しました...', 'error')
+        # User-friendly error message if possible, but raw details are better for debugging now
+        flash(f'Kintoneへの登録に失敗しました: {error_msg}', 'error')
         
     return redirect(url_for('index'))
 

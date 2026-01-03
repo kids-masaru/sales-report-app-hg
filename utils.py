@@ -322,8 +322,15 @@ def upload_to_kintone(data: dict, file_keys: list = None) -> bool:
     
     payload = {"app": int(KINTONE_APP_ID), "record": record}
     try:
-        requests.post(url, headers=headers, data=json.dumps(payload, ensure_ascii=False).encode('utf-8')).raise_for_status()
-        return True
+        resp = requests.post(url, headers=headers, data=json.dumps(payload, ensure_ascii=False).encode('utf-8'))
+        resp.raise_for_status()
+        return True, ""
     except Exception as e:
-        print(f"Error: {e}")
-        return False
+        error_msg = f"{str(e)}"
+        try:
+            if 'resp' in locals():
+                error_msg += f" Response: {resp.text}"
+        except:
+            pass
+        print(f"Kintone Error: {error_msg}")
+        return False, error_msg
