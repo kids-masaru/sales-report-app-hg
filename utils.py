@@ -76,12 +76,11 @@ def save_audio_file(uploaded_file) -> str:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     # Use .filename for the original filename, .name is the form field name
     filename_attr = getattr(uploaded_file, 'filename', uploaded_file.name)
-    original_name = Path(filename_attr).stem
     extension = Path(filename_attr).suffix
-    if not extension: # Fallback if no extension
+    if not extension:
         extension = ".mp3"
-        
-    filename = f"{timestamp}_{original_name}{extension}"
+    # Safe filename (timestamp only) to avoid UnicodeEncodeError during SDK upload
+    filename = f"{timestamp}{extension}"
     file_path = SAVED_AUDIO_DIR / filename
     
     # Use .save() for FileStorage objects (Flask/Werkzeug)
@@ -308,20 +307,14 @@ def process_audio_only(audio_file_path: str, mode: str = "sales") -> dict:
     sys_instruct = prompt_func(get_current_date_str())
     
     # Upload file
-    # Upload file
+    # Ensure mime_type is set via config. Filename must be ASCII (handled in save_audio_file).
     mime = get_mime_type(audio_file_path)
     print(f"Uploading file: {audio_file_path} with mime_type: {mime}")
-    try:
-        # Try passing mime_type directly as suggested by error
-        uploaded_file = client.files.upload(file=audio_file_path, config={'mime_type': mime})
-    except Exception as e:
-        print(f"Upload with config failed, trying direct arg: {e}")
-        # Build config object explicitly if possible, or try direct arg if SDK supports it loosely
-        # But for now, let's stick to the most likely working signature for 0.6+
-        # If 'config' failed, maybe it expects a type. Let's try passing mime_type directly if the first failed or just stick to one robust way.
-        # Actually, let's just REPLACE the previous attempt with the new hypothesis.
-        # Based on error "set the `mime_type` argument", likely `upload(..., mime_type=)`
-        uploaded_file = client.files.upload(file=audio_file_path, mime_type=mime)
+    
+    uploaded_file = client.files.upload(
+        file=audio_file_path, 
+        config={'mime_type': mime}
+    )
     
     prompt = "この音声ファイルの内容を聞き取り、データを抽出してください。"
     
@@ -358,7 +351,11 @@ def process_audio_and_text(audio_file_path: str, text: str, mode: str = "sales")
     
     mime = get_mime_type(audio_file_path)
     print(f"Uploading file: {audio_file_path} with mime_type: {mime}")
-    uploaded_file = client.files.upload(file=audio_file_path, mime_type=mime)
+    
+    uploaded_file = client.files.upload(
+        file=audio_file_path, 
+        config={'mime_type': mime}
+    )
     
     prompt = f"音声ファイルの内容を分析し、データを抽出してください。テキストメモ優先:\n{text}"
     
