@@ -263,21 +263,17 @@ def get_qa_extraction_prompt(current_date_str: str):
   - question: 相手からの質問、疑問、確認事項
   - answer: こちらの回答、説明内容
 
-### 2. 対応日 (action_date)
-活動日付 (YYYY-MM-DD)。不明時は本日({current_date_str})。
-
 ## 出力形式
 ```json
-{{
-    "対応日": "YYYY-MM-DD",
+{
     "qa_list": [
-        {{
+        {
             "question": "...",
             "answer": "..."
-        }},
+        },
         ...
     ]
-}}
+}
 ```
 """
 
