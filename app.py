@@ -105,7 +105,9 @@ def process():
             data['取引先名'] = client_name # For display
             
         # Ensure Next Proposal Date is filled (Default: 3 days later, skip weekends)
-        if not data.get('次回提案予定日'):
+        # Ensure Next Proposal Date is filled (Default: 3 days later, skip weekends)
+        # Only for Sales Report mode
+        if mode != 'qa' and not data.get('次回提案予定日'):
             data['次回提案予定日'] = calculate_smart_next_date(data.get('対応日'))
             
         # Success -> Confirm Page
