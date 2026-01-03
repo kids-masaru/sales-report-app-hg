@@ -308,7 +308,7 @@ def process_audio_only(audio_file_path: str, mode: str = "sales") -> dict:
     sys_instruct = prompt_func(get_current_date_str())
     
     # Upload file
-    uploaded_file = client.files.upload(path=audio_file_path)
+    uploaded_file = client.files.upload(file=audio_file_path)
     
     prompt = "この音声ファイルの内容を聞き取り、データを抽出してください。"
     
