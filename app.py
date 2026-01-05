@@ -111,7 +111,7 @@ def process():
             data['次回提案予定日'] = calculate_smart_next_date(data.get('対応日'))
             
         # Success -> Confirm Page
-        return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS, mode=mode)
+        return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS, staff_options=STAFF_OPTIONS, mode=mode)
 
     except Exception as e:
         flash(f"エラーが発生しました: {str(e)}", 'error')

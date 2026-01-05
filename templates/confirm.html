@@ -4,13 +4,27 @@
     <h2>抽出結果の確認</h2>
     <form method="POST" action="/save" onsubmit="showLoading()">
         <input type="hidden" name="file_path" value="{{ file_path }}">
-        <input type="hidden" name="staff_name" value="{{ staff_name }}">
 
-        <!-- Editable Fields -->
-        {% if mode != 'qa' and data.get('取引先名') %}
-        <div style="background:#f0f9ff; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #bae6fd;">
-            <label style="color:#0369a1; font-size:0.8rem;">クライアント名</label>
-            <div style="font-weight:bold; color:#0284c7;">{{ data['取引先名'] }}</div>
+        <!-- Staff Selection (Editable) -->
+        {% if mode != 'qa' %}
+        <div style="background:#fef3c7; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #fcd34d;">
+            <label style="color:#92400e; font-size:0.85rem; font-weight:bold;"><i class="fas fa-user-tie"></i>
+                担当者</label>
+            <select name="staff_name" style="margin-top:5px;">
+                {% for staff in staff_options %}
+                <option value="{{ staff }}" {% if staff==staff_name %}selected{% endif %}>{{ staff }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <!-- Client Name (Editable) -->
+        {% if mode != 'qa' %}
+        <div style="background:#f0f9ff; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #bae6fd;">
+            <label style="color:#0369a1; font-size:0.85rem; font-weight:bold;"><i class="fas fa-building"></i>
+                クライアント名</label>
+            <input type="text" name="取引先名" value="{{ data.get('取引先名', '') }}" placeholder="クライアント名を入力"
+                style="margin-top:5px;">
             <input type="hidden" name="取引先ID" value="{{ data.get('取引先ID', '') }}">
         </div>
         {% endif %}
