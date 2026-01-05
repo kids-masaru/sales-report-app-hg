@@ -18,14 +18,20 @@
         </div>
         {% endif %}
 
-        <!-- Client Name (Editable) -->
+        <!-- Client Name (Editable with Search) -->
         {% if mode != 'qa' %}
         <div style="background:#f0f9ff; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #bae6fd;">
             <label style="color:#0369a1; font-size:0.85rem; font-weight:bold;"><i class="fas fa-building"></i>
                 クライアント名</label>
-            <input type="text" name="取引先名" value="{{ data.get('取引先名', '') }}" placeholder="クライアント名を入力"
-                style="margin-top:5px;">
-            <input type="hidden" name="取引先ID" value="{{ data.get('取引先ID', '') }}">
+            <div style="position:relative;">
+                <input type="text" id="clientSearchInputConfirm" value="{{ data.get('取引先名', '') }}"
+                    placeholder="会社名を入力して検索..." autocomplete="off" style="margin-top:5px;">
+                <input type="hidden" name="取引先ID" id="client_id_confirm" value="{{ data.get('取引先ID', '') }}">
+                <input type="hidden" name="取引先名" id="client_name_confirm" value="{{ data.get('取引先名', '') }}">
+                <div id="searchResultsConfirm"
+                    style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ddd; border-radius:8px; max-height:200px; overflow-y:auto; z-index:1000; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+            </div>
         </div>
         {% endif %}
 
@@ -71,4 +77,64 @@
         <a href="/" style="color:#888; text-decoration:none;">戻る（破棄）</a>
     </div>
 </div>
+
+<script>
+    // Client Search Logic for Confirm Page
+    document.addEventListener('DOMContentLoaded', function () {
+        const clientInput = document.getElementById('clientSearchInputConfirm');
+        const resultsDiv = document.getElementById('searchResultsConfirm');
+        const clientIdInput = document.getElementById('client_id_confirm');
+        const clientNameInput = document.getElementById('client_name_confirm');
+        let debounceTimer;
+
+        if (clientInput) {
+            clientInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                const query = this.value;
+
+                // Update hidden field as user types
+                clientNameInput.value = query;
+
+                if (query.length < 2) {
+                    resultsDiv.style.display = 'none';
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    fetch(`/api/search_clients?q=${encodeURIComponent(query)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            resultsDiv.innerHTML = '';
+                            if (data.length === 0) {
+                                resultsDiv.style.display = 'none';
+                                return;
+                            }
+                            data.forEach(client => {
+                                const div = document.createElement('div');
+                                div.style.padding = '10px';
+                                div.style.borderBottom = '1px solid #eee';
+                                div.style.cursor = 'pointer';
+                                div.textContent = client.name;
+                                div.onclick = () => {
+                                    clientInput.value = client.name;
+                                    clientIdInput.value = client.record_id;
+                                    clientNameInput.value = client.name;
+                                    resultsDiv.style.display = 'none';
+                                };
+                                resultsDiv.appendChild(div);
+                            });
+                            resultsDiv.style.display = 'block';
+                        });
+                }, 300);
+            });
+
+            // Hide results on click outside
+            document.addEventListener('click', function (e) {
+                if (e.target !== clientInput && e.target !== resultsDiv) {
+                    resultsDiv.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
