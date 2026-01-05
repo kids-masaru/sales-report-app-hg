@@ -358,6 +358,24 @@
             document.getElementById('loading').style.display = 'flex';
         }
 
+        // iOS PWA standalone mode fix for input focus
+        (function () {
+            // Check if running as iOS PWA (standalone mode)
+            var isIOSPWA = ('standalone' in window.navigator) && window.navigator.standalone;
+
+            if (isIOSPWA) {
+                // Force focus on touch for all inputs in iOS PWA mode
+                document.addEventListener('touchend', function (e) {
+                    var target = e.target;
+                    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                        setTimeout(function () {
+                            target.focus();
+                        }, 100);
+                    }
+                }, false);
+            }
+        })();
+
         // File upload visual feedback
         document.addEventListener('DOMContentLoaded', function () {
             const fileInput = document.querySelector('.file-upload-input');
