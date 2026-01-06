@@ -445,3 +445,83 @@ def upload_to_kintone(data: dict, file_keys: list = None) -> bool:
             pass
         print(f"Kintone Error: {error_msg}")
         return False, error_msg
+
+def fetch_client_history(client_id: str, limit: int = 5) -> list:
+    """
+    Fetch recent sales reports for a specific client.
+    """
+    if not all([KINTONE_SUBDOMAIN, KINTONE_APP_ID, KINTONE_API_TOKEN]): return []
+    
+    url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"
+    combined_token = KINTONE_API_TOKEN
+    if KINTONE_CLIENT_API_TOKEN: combined_token = f"{KINTONE_API_TOKEN},{KINTONE_CLIENT_API_TOKEN}"
+    headers = {"X-Cybozu-API-Token": combined_token}
+    
+    # Query: Match ClientID, Order by Date Desc
+    query = f'取引先ID = "{client_id}" order by 対応日 desc limit {limit}'
+    params = {"app": KINTONE_APP_ID, "query": query}
+    
+    try:
+        resp = requests.get(url, headers=headers, params=params)
+        if resp.status_code != 200:
+            print(f"History Fetch Error: {resp.text}")
+            return []
+            
+        records = resp.json().get("records", [])
+        history = []
+        for r in records:
+            history.append({
+                "date": r.get("対応日", {}).get("value", ""),
+                "staff": r.get("対応者", {}).get("value", [{}])[0].get("name", "") if r.get("対応者", {}).get("value") else "",
+                "type": r.get("新規営業件名", {}).get("value", ""),
+                "content": r.get("商談内容", {}).get("value", ""),
+                "next_action": r.get("次回提案内容", {}).get("value", "")
+            })
+        return history
+    except Exception as e:
+        print(f"History Fetch Exception: {e}")
+        return []
+
+def summarize_history(history_data: list) -> dict:
+    """
+    Use Gemini to summarize the history list.
+    """
+    if not history_data or not GEMINI_API_KEY:
+        return {"summary": "履歴がありません。", "latest": ""}
+        
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    
+    # Construct context txt
+    context_text = ""
+    for i, item in enumerate(history_data):
+        context_text += f"[{item['date']}] {item['type']} (担当: {item['staff']})\n"
+        context_text += f"内容: {item['content']}\n"
+        context_text += f"次回: {item['next_action']}\n\n"
+        
+    prompt = f"""
+あなたは営業アシスタントです。以下の過去の商談履歴（直近{len(history_data)}件）を読み、次の訪問に向けた要約を作成してください。
+
+## 履歴データ
+{context_text}
+
+## 出力要件 (JSON形式)
+- **flow**: これまでの経緯や主な議論の流れを「3行程度」で簡潔にまとめてください。
+- **latest_status**: 直近の商談で何が決まり、今はどういう状態か（次に何をする予定か）を「1行」でまとめてください。
+
+## 出力例
+```json
+{{
+  "flow": "初回訪問でニーズをヒアリングし、見積を提示したが価格面で難色を示された。\\nその後、上長同行で再提案を行い、メリットを強調したことで検討フェーズに入った。\\n競合他社との比較表を提出し、優位性をアピールし続けている。",
+  "latest_status": "最終見積を提出済みで、来月の決裁会議の結果待ち状態。"
+}}
+```
+"""
+    try:
+        resp = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+        )
+        return parse_json_response(resp.text)
+    except Exception as e:
+        print(f"Summarize Error: {e}")
+        return {"flow": "要約生成に失敗しました。", "latest_status": ""}

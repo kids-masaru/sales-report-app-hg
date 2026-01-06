@@ -56,13 +56,27 @@ def search_clients_route():
 
 @app.route('/', methods=['GET'])
 def index():
-    # Trying root-relative without /app prefix which was HF specific.
-    # Bump version to 13
     icon_url = "/static/icon.png?v=13" 
     ios_icon_url = "/static/apple-touch-icon.png?v=13" 
     manifest_url = "/static/manifest.json?v=13"
     
     return render_template('index.html', staff_options=STAFF_OPTIONS)
+
+@app.route('/history/<client_id>')
+def history(client_id):
+    from utils import fetch_client_history, summarize_history
+    
+    # Get client name if possible (passed via query param for display, or fetch?)
+    # Kintone fetch usually returns records, we can grab name from first record if available
+    client_name = request.args.get('name', 'クライアント')
+    
+    records = fetch_client_history(client_id, limit=5)
+    summary = summarize_history(records)
+    
+    return render_template('history.html', 
+                           client_name=client_name, 
+                           records=records, 
+                           summary=summary)
 
 @app.route('/process', methods=['POST'])
 def process():

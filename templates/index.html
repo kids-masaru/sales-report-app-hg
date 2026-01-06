@@ -138,6 +138,21 @@
                                     document.getElementById('client_id').value = client.record_id; // Using record_id for Kintone
                                     document.getElementById('client_name').value = client.name;
                                     resultsDiv.style.display = 'none';
+
+                                    // Show History Button
+                                    let histBtn = document.getElementById('historyBtn');
+                                    if (!histBtn) {
+                                        histBtn = document.createElement('div');
+                                        histBtn.id = 'historyBtn';
+                                        histBtn.style.marginTop = '5px';
+                                        clientInput.parentNode.parentNode.appendChild(histBtn);
+                                    }
+                                    histBtn.innerHTML = `
+                                        <a href="/history/${client.record_id}?name=${encodeURIComponent(client.name)}" target="_blank" 
+                                           style="display:block; background:#f0f9ff; color:#0284c7; padding:8px; border-radius:6px; text-decoration:none; text-align:center; font-weight:bold; border:1px solid #bae6fd;">
+                                           <i class="fas fa-history"></i> 📝 ${client.name} との過去のやり取りを確認 (AI要約)
+                                        </a>
+                                    `;
                                 };
                                 resultsDiv.appendChild(div);
                             });
