@@ -51,10 +51,17 @@
         <textarea name="{{ key }}" style="display:none;">{{ value | tojson }}</textarea>
         {% elif key in ["商談内容", "現在の課題・問題点", "競合・マーケット情報"] %}
         <textarea name="{{ key }}">{{ value }}</textarea>
-        {% elif key == "新規営業件名" or key == "次回営業件名" %}
+        {% elif key == "新規営業件名" %}
         <select name="{{ key }}">
             <option value="">(未選択)</option>
             {% for opt in sales_options %}
+            <option value="{{ opt }}" {% if opt==value %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+        </select>
+        {% elif key == "次回営業件名" %}
+        <select name="{{ key }}">
+            <option value="">(未選択)</option>
+            {% for opt in next_sales_options %}
             <option value="{{ opt }}" {% if opt==value %}selected{% endif %}>{{ opt }}</option>
             {% endfor %}
         </select>

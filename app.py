@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from utils import (
     process_audio_only, process_text_only, process_audio_and_text,
     upload_file_to_kintone, upload_to_kintone, save_audio_file,
-    STAFF_OPTIONS, SALES_ACTIVITY_OPTIONS, init_gemini, search_clients, calculate_smart_next_date
+    STAFF_OPTIONS, SALES_ACTIVITY_OPTIONS, NEXT_SALES_ACTIVITY_OPTIONS, init_gemini, search_clients, calculate_smart_next_date
 )
 
 app = Flask(__name__)
@@ -111,7 +111,7 @@ def process():
             data['次回提案予定日'] = calculate_smart_next_date(data.get('対応日'))
             
         # Success -> Confirm Page
-        return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS, staff_options=STAFF_OPTIONS, mode=mode)
+        return render_template('confirm.html', data=data, file_path=saved_path or "", staff_name=staff_name, sales_options=SALES_ACTIVITY_OPTIONS, next_sales_options=NEXT_SALES_ACTIVITY_OPTIONS, staff_options=STAFF_OPTIONS, mode=mode)
 
     except Exception as e:
         flash(f"エラーが発生しました: {str(e)}", 'error')
