@@ -65,6 +65,8 @@
             <option value="{{ opt }}" {% if opt==value %}selected{% endif %}>{{ opt }}</option>
             {% endfor %}
         </select>
+        {% elif key in ["対応日", "次回提案予定日"] %}
+        <input type="date" name="{{ key }}" value="{{ value }}">
         {% else %}
         <input type="text" name="{{ key }}" value="{{ value }}">
         {% endif %}
